@@ -138,7 +138,7 @@ const Create = ({ onChangeSearch }) => {
             }}>
             {/* Modal Body */}
             <Formik
-              initialValues={{}}
+              initialValues={{ name: "" }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
                   values.status = "active";

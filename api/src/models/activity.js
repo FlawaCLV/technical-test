@@ -15,7 +15,9 @@ const Schema = new mongoose.Schema({
   value: { type: Number, default: 0 },
   detail: [{ date: Date, value: Number }],
   created_at: { type: Date, default: Date.now },
+  repositoryUrl: { type: String },
   comment: { type: String },
+  milestone: { type: String },
   organisation: { type: String, trim: true, unique: true },
 });
 

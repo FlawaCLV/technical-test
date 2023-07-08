@@ -1,5 +1,5 @@
 import { Formik } from "formik";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { useHistory } from "react-router-dom";
 import Loader from "../../components/loader";
@@ -14,11 +14,15 @@ const NewList = () => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/user");
-      setUsers(data);
+      getUsers();
     })();
     getProjects();
   }, []);
+
+  async function getUsers() {
+    const { data } = await api.get("/user");
+    setUsers(data);
+  }
 
   async function getProjects() {
     const res = await api.get("/project");
@@ -71,7 +75,7 @@ const NewList = () => {
               </span>
             </div>
           </div>
-          <Create />
+          <Create onImported={() => getUsers()} />
         </div>
         <div className="overflow-x-auto">
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 py-6 gap-5 ">
@@ -85,14 +89,90 @@ const NewList = () => {
   );
 };
 
-const Create = () => {
+const Create = ({ onImported }) => {
   const [open, setOpen] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [toastId, setToastId] = useState(undefined);
+  const refInput = useRef();
+  const defaults = {
+    status: "active",
+    availability: "not available",
+    role: "ADMIN",
+  };
 
   const history = useHistory();
 
+  const onImport = () => {
+    setToastId(
+      toast("Upload a CSV file with 6 columns: name;	email;	job_title;	days_worked;	cost_per_day;	sell_per_day", {
+        icon: `ℹ️`,
+        duration: 10000,
+      }),
+    );
+    refInput.current.click();
+  };
+
+  const onFileChange = (file) => {
+    toast.dismiss(toastId);
+
+    if (!file) return;
+    if (file.type.indexOf("csv") === -1) return toast.error("Please upload a CSV file");
+
+    setIsImporting(true);
+    const reader = new FileReader();
+
+    reader.onerror = (err) => {
+      toast.error("Can't read your file", err);
+      setIsImporting(false);
+    };
+
+    reader.onload = async (e) => {
+      const text = e.target.result;
+      const users = text
+        .replace(/\r/g, "")
+        .split("\n")
+        .map((row) => {
+          const cells = row.split(";");
+          if (cells[0] === "name" || !cells[1]) return undefined; // remove first & last rows
+          return {
+            ...defaults,
+            name: cells[0],
+            email: cells[1],
+            job_title: cells[2],
+            days_worked: cells[3],
+            costPerDay: cells[4],
+            sellPerDay: cells[5],
+          };
+        })
+        .filter((row) => !!row); // Remove empty rows
+
+      const resAll = await Promise.all(users.map((user) => api.post("/user", user)));
+      if (resAll.filter((res) => !res.ok).length) return toast.error("Error uploading users");
+      toast.success("Created!");
+      setIsImporting(false);
+      onImported();
+    };
+
+    reader.readAsText(file);
+  };
+
   return (
     <div style={{ marginBottom: 10 }}>
-      <div className="text-right">
+      <div className="text-right flex">
+        <LoadingButton
+          className="bg-[#0560FD] text-[#fff] py-[12px] px-[22px] w-[170px] h-[48px]	rounded-[10px] text-[16px] font-medium mr-[10px]"
+          loading={isImporting}
+          onClick={onImport}>
+          Import (csv)
+        </LoadingButton>
+        <input
+          style={{ visibility: "hidden", position: "absolute", margin: 0, padding: 0, maxWidth: 0, maxHeight: 0 }}
+          name="import"
+          type="file"
+          ref={refInput}
+          multiple={false}
+          onChange={(e) => onFileChange(e.target.files[0])}
+        />
         <button className="bg-[#0560FD] text-[#fff] py-[12px] px-[22px] w-[170px] h-[48px]	rounded-[10px] text-[16px] font-medium" onClick={() => setOpen(true)}>
           Create new user
         </button>
@@ -105,13 +185,10 @@ const Create = () => {
               e.stopPropagation();
             }}>
             <Formik
-              initialValues={{}}
+              initialValues={{ name: "", email: "", password: "" }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
-                  values.status = "active";
-                  values.availability = "not available";
-                  values.role = "ADMIN";
-                  const res = await api.post("/user", values);
+                  const res = await api.post("/user", { ...defaults, ...values });
                   if (!res.ok) throw res;
                   toast.success("Created!");
                   setOpen(false);
@@ -128,7 +205,7 @@ const Create = () => {
                     <div className="flex justify-between flex-wrap">
                       <div className="w-full md:w-[48%] mt-2">
                         <div className="text-[14px] text-[#212325] font-medium	">Name</div>
-                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="username" value={values.username} onChange={handleChange} />
+                        <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="name" value={values.name} onChange={handleChange} />
                       </div>
                       <div className="w-full md:w-[48%] mt-2">
                         <div className="text-[14px] text-[#212325] font-medium	">Email</div>

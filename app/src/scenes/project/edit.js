@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 
 export default function EditProject() {
   const [project, setProject] = useState(null);
+  const [users, setUsers] = useState([]);
   const [bufferOtherLink, setBufferOtherLink] = useState("");
   const [bufferOtherLinkLabel, setBufferOtherLinkLabel] = useState("");
   const { id } = useParams();
@@ -18,6 +19,13 @@ export default function EditProject() {
     (async () => {
       const { data: u } = await api.get(`/project/${id}`);
       setProject(u);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get("/user");
+      setUsers(data);
     })();
   }, []);
 
@@ -70,7 +78,15 @@ export default function EditProject() {
                     </div>
                     <div className="w-full md:w-[260px] mt-2">
                       <div className="text-[14px] text-[#212325] font-medium	">Lead by name</div>
-                      <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="lead" value={values.lead} onChange={handleChange} />
+                      {/* <input className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="lead" value={values.lead} onChange={handleChange} /> */}
+                      <select className="projectsInput text-[14px] font-normal text-[#212325] rounded-[10px]" name="lead" value={values.lead} onChange={handleChange}>
+                        <option value=""></option>
+                        {users.map((user) => (
+                          <option key={user._id} value={user._id}>
+                            {user.name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div className="w-full md:w-[260px] mt-2">
                       <div className="text-[14px] text-[#212325] font-medium	">Status</div>
@@ -137,9 +153,9 @@ export default function EditProject() {
 
                   <div className="w-full mt-3">
                     <div className="text-[14px] text-[#212325] font-medium	">Autres</div>
-                    {(values.links || []).map((link) => {
+                    {(values.links || []).map((link, index) => {
                       return (
-                        <div className="flex flex-1 flex-row mt-2 items-center gap-1">
+                        <div key={"link-" + index} className="flex flex-1 flex-row mt-2 items-center gap-1">
                           <div className="flex gap-1 flex-1 items-center">
                             <input
                               className="projectsInput mt-0 text-[14px] font-normal text-[#212325] rounded-[10px]"

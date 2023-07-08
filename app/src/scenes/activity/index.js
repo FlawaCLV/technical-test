@@ -110,6 +110,18 @@ const Activities = ({ date, user, project }) => {
     setActivities(n);
   }
 
+  function onUpdateMilestone(i, value) {
+    const n = [...activities];
+    n[i].milestone = value;
+    setActivities(n);
+  }
+
+  function onUpdateRepositoryUrl(i, value) {
+    const n = [...activities];
+    n[i].repositoryUrl = value;
+    setActivities(n);
+  }
+
   function onUpdateComment(i, value) {
     const n = [...activities];
     n[i].comment = value;
@@ -175,7 +187,7 @@ const Activities = ({ date, user, project }) => {
                   </tr>
                   {activities.map((e, i) => {
                     return (
-                      <React.Fragment key={e.project}>
+                      <React.Fragment key={e.project + i}>
                         <tr className="border-t border-b border-r border-[#E5EAEF]" key={`1-${e._id}`} onClick={() => setOpen(i)}>
                           <th className="w-[100px] border-t border-b border-r text-[12px] font-bold text-[#212325] text-left">
                             <div className="flex flex-1 items-center justify-between gap-1 px-2">
@@ -208,10 +220,24 @@ const Activities = ({ date, user, project }) => {
                             <th colSpan="30">
                               <div className="w-full">
                                 {/* <th>My Work Space</th> */}
+                                <input
+                                  name="milestone"
+                                  value={e.milestone}
+                                  onChange={(e) => onUpdateMilestone(i, e.target.value)}
+                                  placeholder="Milestone achieved"
+                                  className="w-full text-sm pt-2 pl-2"
+                                />
+                                <input
+                                  name="repositoryUrl"
+                                  value={e.repositoryUrl}
+                                  onChange={(e) => onUpdateRepositoryUrl(i, e.target.value)}
+                                  placeholder="Repository URL (Pull request, commit, etc.)"
+                                  className="w-full text-sm pt-2 pl-2"
+                                />
                                 <textarea
                                   value={e.comment}
                                   onChange={(e) => onUpdateComment(i, e.target.value)}
-                                  placeholder={`Please add a comment on what you deliver on ${e.project} (We need to show value created to clients)`}
+                                  placeholder={`Please add a comment on what you deliver on ${e.projectName} (We need to show value created to clients)`}
                                   rows={6}
                                   className="w-full text-sm pt-2 pl-2"
                                 />
