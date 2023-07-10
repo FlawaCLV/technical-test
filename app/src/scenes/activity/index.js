@@ -36,7 +36,7 @@ const Activity = () => {
       <div className="flex flex-wrap gap-5 p-2 md:!px-8">
         <SelectProject
           value={project}
-          onChange={(e) => setProject(e.name)}
+          onChange={(e) => setProject(typeof e === "object" ? e.name : "")}
           className="w-[180px] bg-[#FFFFFF] text-[#212325] py-[10px] px-[14px] rounded-[10px] border-r-[16px] border-[transparent] cursor-pointer shadow-sm font-normal text-[14px]"
         />
         <SelectMonth start={-3} indexDefaultValue={3} value={date} onChange={(e) => setDate(e.target.value)} showArrows />
@@ -224,15 +224,15 @@ const Activities = ({ date, user, project }) => {
                                   name="milestone"
                                   value={e.milestone}
                                   onChange={(e) => onUpdateMilestone(i, e.target.value)}
-                                  placeholder="Milestone achieved"
-                                  className="w-full text-sm pt-2 pl-2"
+                                  placeholder="Milestone achieved: release, v1, hotfix, etc."
+                                  className="w-full text-sm pt-2 pl-2 pb-2 border-b-2"
                                 />
                                 <input
                                   name="repositoryUrl"
                                   value={e.repositoryUrl}
                                   onChange={(e) => onUpdateRepositoryUrl(i, e.target.value)}
-                                  placeholder="Repository URL (Pull request, commit, etc.)"
-                                  className="w-full text-sm pt-2 pl-2"
+                                  placeholder="Link to PR, commit, tag, etc."
+                                  className="w-full text-sm pt-2 pl-2 pb-2 border-b-2"
                                 />
                                 <textarea
                                   value={e.comment}

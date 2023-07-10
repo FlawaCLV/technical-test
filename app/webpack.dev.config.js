@@ -1,10 +1,17 @@
 const path = require("path");
 const webpack = require("webpack");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 module.exports = (env) => {
   const plugins = [
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "./public/robots.txt", to: "./robots.txt" },
+        { from: "./public/import_users_example.csv", to: "./import_users_example.csv" },
+      ],
+    }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
       filename: "index.html",

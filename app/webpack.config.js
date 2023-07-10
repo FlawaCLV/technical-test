@@ -8,7 +8,10 @@ module.exports = () => {
   const mode = "production";
   const plugins = [
     new CopyWebpackPlugin({
-      patterns: [{ from: "./public/robots.txt", to: "./robots.txt" }],
+      patterns: [
+        { from: "./public/robots.txt", to: "./robots.txt" },
+        { from: "./public/import_users_example.csv", to: "./import_users_example.csv" },
+      ],
     }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",

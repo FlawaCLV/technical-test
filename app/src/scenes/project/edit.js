@@ -61,7 +61,7 @@ export default function EditProject() {
                 history.push(`/project/${project._id}`);
               } catch (e) {
                 console.log(e);
-                toast.error("Some Error!");
+                toast.error(`Error while editing the project. (Code: ${e.code})`, e.code);
               }
             }}>
             {({ values, handleChange, handleSubmit, isSubmitting }) => (
@@ -155,7 +155,7 @@ export default function EditProject() {
                     <div className="text-[14px] text-[#212325] font-medium	">Autres</div>
                     {(values.links || []).map((link, index) => {
                       return (
-                        <div key={"link-" + index} className="flex flex-1 flex-row mt-2 items-center gap-1">
+                        <div key={link + index} className="flex flex-1 flex-row mt-2 items-center gap-1">
                           <div className="flex gap-1 flex-1 items-center">
                             <input
                               className="projectsInput mt-0 text-[14px] font-normal text-[#212325] rounded-[10px]"

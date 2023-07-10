@@ -91,8 +91,8 @@ const NewList = () => {
 
 const Create = ({ onImported }) => {
   const [open, setOpen] = useState(false);
+  const [openImport, setOpenImport] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [toastId, setToastId] = useState(undefined);
   const refInput = useRef();
   const defaults = {
     status: "active",
@@ -103,18 +103,10 @@ const Create = ({ onImported }) => {
   const history = useHistory();
 
   const onImport = () => {
-    setToastId(
-      toast("Upload a CSV file with 6 columns: name;	email;	job_title;	days_worked;	cost_per_day;	sell_per_day", {
-        icon: `ℹ️`,
-        duration: 10000,
-      }),
-    );
     refInput.current.click();
   };
 
   const onFileChange = (file) => {
-    toast.dismiss(toastId);
-
     if (!file) return;
     if (file.type.indexOf("csv") === -1) return toast.error("Please upload a CSV file");
 
@@ -150,6 +142,7 @@ const Create = ({ onImported }) => {
       if (resAll.filter((res) => !res.ok).length) return toast.error("Error uploading users");
       toast.success("Created!");
       setIsImporting(false);
+      setOpenImport(false);
       onImported();
     };
 
@@ -159,24 +152,45 @@ const Create = ({ onImported }) => {
   return (
     <div style={{ marginBottom: 10 }}>
       <div className="text-right flex">
-        <LoadingButton
-          className="bg-[#0560FD] text-[#fff] py-[12px] px-[22px] w-[170px] h-[48px]	rounded-[10px] text-[16px] font-medium mr-[10px]"
-          loading={isImporting}
-          onClick={onImport}>
+        <button className="bg-[#0560FD] text-[#fff] py-[12px] px-[22px] w-[170px] h-[48px]	rounded-[10px] text-[16px] font-medium mr-[10px]" onClick={() => setOpenImport(true)}>
           Import (csv)
-        </LoadingButton>
-        <input
-          style={{ visibility: "hidden", position: "absolute", margin: 0, padding: 0, maxWidth: 0, maxHeight: 0 }}
-          name="import"
-          type="file"
-          ref={refInput}
-          multiple={false}
-          onChange={(e) => onFileChange(e.target.files[0])}
-        />
+        </button>
         <button className="bg-[#0560FD] text-[#fff] py-[12px] px-[22px] w-[170px] h-[48px]	rounded-[10px] text-[16px] font-medium" onClick={() => setOpen(true)}>
           Create new user
         </button>
       </div>
+
+      {/* Users import */}
+      {openImport ? (
+        <div className=" absolute top-0 bottom-0 left-0 right-0  bg-[#00000066] flex justify-center p-[1rem] z-50 " onClick={() => setOpenImport(false)}>
+          <div
+            className="w-full md:w-[60%] h-fit  bg-[white] p-[25px] rounded-md"
+            onClick={(e) => {
+              e.stopPropagation();
+            }}>
+            <input
+              style={{ visibility: "hidden", position: "absolute", margin: 0, padding: 0, maxWidth: 0, maxHeight: 0 }}
+              name="import"
+              type="file"
+              ref={refInput}
+              multiple={false}
+              onChange={(e) => onFileChange(e.target.files[0])}
+            />
+            <p className="mb-[20px]">ℹ️ Upload a CSV file with 6 columns: name; email; job_title; days_worked; cost_per_day; sell_per_day</p>
+            <p className="underline font-bold mb-[20px]">
+              <a href="/import_users_example.csv">Download an example</a>
+            </p>
+            <LoadingButton
+              className="bg-[#0560FD] text-[#fff] py-[12px] px-[22px] w-[170px] h-[48px]	rounded-[10px] text-[16px] font-medium mr-[10px]"
+              loading={isImporting}
+              onClick={onImport}>
+              Import
+            </LoadingButton>
+          </div>
+        </div>
+      ) : null}
+
+      {/* User form */}
       {open ? (
         <div className=" absolute top-0 bottom-0 left-0 right-0  bg-[#00000066] flex justify-center p-[1rem] z-50 " onClick={() => setOpen(false)}>
           <div
@@ -195,7 +209,7 @@ const Create = ({ onImported }) => {
                   history.push(`/user/${res.data._id}`);
                 } catch (e) {
                   console.log(e);
-                  toast.error("Some Error!", e.code);
+                  toast.error(`Error while creating a user. (Code: ${e.code})`, e.code);
                 }
                 setSubmitting(false);
               }}>
@@ -287,7 +301,7 @@ const FilterStatus = ({ filter, setFilter }) => {
   );
 };
 
-const UserCard = ({ hit, projects }) => {
+const UserCard = ({ hit }) => {
   const history = useHistory();
   return (
     <div
