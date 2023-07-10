@@ -140,7 +140,7 @@ const Create = ({ onImported }) => {
 
       const resAll = await Promise.all(users.map((user) => api.post("/user", user)));
       if (resAll.filter((res) => !res.ok).length) return toast.error("Error uploading users");
-      toast.success("Created!");
+      toast.success(`${users.length} users imported!`);
       setIsImporting(false);
       setOpenImport(false);
       onImported();
